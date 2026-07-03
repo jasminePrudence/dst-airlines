@@ -1,0 +1,19 @@
+                         SOURCES DE DONNÉES
+ ┌──────────────────────────────────────────────────────────────┐
+ │ AviationStack │ OpenSky │ AVWX │ Kaggle │
+ └───────────────┬──────────┬──────┬────────┘
+                 │          │      │
+                 ▼          ▼      ▼
+            ETL - EXTRACT (Python)
+                 │
+                 ▼
+            Apache Kafka
+        (topics temps réel)
+                 │
+        ┌────────┴────────┐
+        ▼                 ▼
+   Consumer Mongo     Consumer PostgreSQL
+        │                 │
+        ▼                 ▼
+   MongoDB          Data Warehouse
+                      (Star Schema)

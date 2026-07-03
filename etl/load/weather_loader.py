@@ -1,5 +1,6 @@
 #loader meteo
 from sqlalchemy import text
+
 def get_or_create_weather(conn, weather):
     row = conn.execute(
         text("""
@@ -54,3 +55,6 @@ def get_or_create_weather(conn, weather):
         }
     )
     return row.fetchone()[0]
+
+if __name__ == "__main__":
+    get_or_create_weather()

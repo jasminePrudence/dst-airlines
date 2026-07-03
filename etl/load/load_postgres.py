@@ -1,6 +1,6 @@
 #Orchestre le changement 
 # Exemple si la classe est dans un fichier nommé warehouse_loader.py dans le même dossier
-from warehouse_loader import WarehouseLoader  
+from etl.load.warehouse_loader import WarehouseLoader
 from datetime import datetime
 import json
 from kafka import KafkaConsumer
@@ -18,9 +18,13 @@ consumer = KafkaConsumer(
 )
 
 loader = WarehouseLoader()
-print("🎧 PostgreSQL Consumer démarré...")
+def load_postgres():
+    print("🎧 PostgreSQL Consumer démarré...")
 
-for message in consumer:
-    loader.process_snapshot(
-        message.value
-    )
+    for message in consumer:
+        loader.process_snapshot(
+            message.value
+        )
+
+if __name__ == "__main__":
+    load_postgres()

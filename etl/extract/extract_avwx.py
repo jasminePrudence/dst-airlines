@@ -18,7 +18,7 @@ AIRPORTS = [
     "LEMD"
 ]
 
-def extract():
+def extract_avwx():
     logger.info("--- Démarrage du Producer AVWX (Kafka) ---")
     
     # Vérification de sécurité pour la clé API
@@ -60,8 +60,5 @@ def extract():
         logger.info("😴 Pause de 5 minutes avant la prochaine extraction...")
         time.sleep(300)
 
-def main():
-    extract()
-
 if __name__ == "__main__":
-    main()
+    extract_avwx()

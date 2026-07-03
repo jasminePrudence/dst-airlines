@@ -4,7 +4,6 @@ from kafka import KafkaConsumer
 from sqlalchemy import text
 from etl.utils.postgres import engine
 
-# Configuration du Consumer Kafka
 consumer = KafkaConsumer(
     "weather-raw",
     bootstrap_servers=["kafka:29092"],

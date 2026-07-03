@@ -10,7 +10,7 @@ def build_fact():
     conn_uri = "postgresql://postgres:postgres123@postgres:5432/dst_airlines"
     print("--- Début de la construction de FACT_FLIGHTS ---")
     
-    # 1. Charger la table de staging et les dimensions référentielles dans Polars
+    # Charger la table de staging et les dimensions référentielles dans Polars
     df_stg = pl.read_database_uri("SELECT * FROM stg_aviationstack;", conn_uri)
     df_dim_airports = pl.read_database_uri("SELECT airport_key, iata_code FROM dim_airports;", conn_uri)
     df_dim_airlines = pl.read_database_uri("SELECT airline_key, iata_code FROM dim_airlines;", conn_uri)
@@ -26,7 +26,7 @@ def build_fact():
         pl.col("airline_iata").str.to_uppercase()
     ])
 
-    # 2. JOINTURES avec Polars pour récupérer les clés de substitution (Surrogate Keys)
+    # JOINTURES avec Polars pour récupérer les clés de substitution (Surrogate Keys)
     # Jointure pour le départ
     df_joined = df_stg.join(df_dim_airports, left_on="departure_iata", right_on="iata_code", how="left") \
                       .rename({"airport_key": "departure_airport_key"})
@@ -38,13 +38,13 @@ def build_fact():
     # Jointure pour la compagnie
     df_joined = df_joined.join(df_dim_airlines, left_on="airline_iata", right_on="iata_code", how="left")
 
-    # 3. CALCUL DU CO2 (Eco-conception / Consigne RSE)
+    # CALCUL DU CO2 (Eco-conception / Consigne RSE)
     # L'axe CDG-GVA fait environ 400 km à vol d'oiseau
     df_final = df_joined.with_columns(
         pl.lit(calculate_co2(400)).alias("estimated_co2_kg")
     )
 
-    # 4. Insertion dans la table de faits FACT_FLIGHTS
+    # Insertion dans la table de faits FACT_FLIGHTS
     conn = psycopg2.connect(host="postgres", database="dst_airlines", user="postgres", password="postgres123")
     cursor = conn.cursor()
     

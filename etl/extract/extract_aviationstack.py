@@ -16,7 +16,7 @@ def extract_aviationstack():
     
     params = {
         'access_key': api_key,
-        'arr_iata': 'GVA', # Filtrage sur l'aéroport d'arrivée Genève (GVA)
+        'arr_iata': 'GVA', # (aéroport d'arrivée Genève (GVA))
     }
     
     logger.info("Extraction aviationstack")
@@ -32,7 +32,7 @@ def extract_aviationstack():
             
         rows = []
         for flight in data:
-            # Gestion et normalisation préventive des codes IATA (Consigne : Toujours en majuscules)
+            # Gestion et normalisation des codes IATA (Toujours en majuscules)
             dep_iata = flight.get("departure", {}).get("iata")
             arr_iata = flight.get("arrival", {}).get("iata")
             airline_iata = flight.get("airline", {}).get("iata")
@@ -54,11 +54,11 @@ def extract_aviationstack():
                 "status": flight.get("flight_status")
             })
             
-        # Déduplication efficace avec Polars
+        # Déduplication
         df = pl.DataFrame(rows)
         df = df.unique(subset=["flight_number", "scheduled_departure"])
         
-        # Connexion à PostgreSQL (Spécification explicite du port interne Docker)
+        # Connexion à PostgreSQL
         conn = psycopg2.connect(
             host="postgres", 
             database="dst_airlines", 

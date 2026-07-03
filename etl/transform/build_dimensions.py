@@ -2,12 +2,12 @@ import polars as pl
 import psycopg2
 
 def build_dimensions():
-    # 1. Chaîne de connexion PostgreSQL Docker
+    # Chaîne de connexion PostgreSQL Docker
     conn_uri = "postgresql://postgres:postgres123@postgres:5432/dst_airlines"
     
     print("--- 🚀 Début du peuplement des Dimensions ---")
     
-    # 2. Lecture de la table de staging globale via Polars
+    # Lecture de la table de staging globale via Polars
     query_stg = "SELECT departure_iata, arrival_iata, airline_name, airline_iata, aircraft_icao24 FROM stg_aviationstack"
     df_stg = pl.read_database_uri(query_stg, conn_uri)
     
@@ -25,12 +25,12 @@ def build_dimensions():
     df_airlines_stg = df_stg.select(["airline_iata", "airline_name"]).drop_nulls().unique(subset=["airline_iata"])
     df_airlines_stg = df_airlines_stg.with_columns(pl.col("airline_iata").str.to_uppercase())
 
-    # --- TRAITEMENT DIM_AIRCRAFT ✈️ ---
+    # --- TRAITEMENT DIM_AIRCRAFT ---
     # On extrait les codes ICAO24 uniques des avions qui ont réellement volé
     df_aircraft_stg = df_stg.select("aircraft_icao24").rename({"aircraft_icao24": "icao24"}).drop_nulls().unique()
     df_aircraft_stg = df_aircraft_stg.with_columns(pl.col("icao24").str.to_lowercase())
 
-    # 3. Connexion classique avec Psycopg2 pour l'insertion sécurisée (ON CONFLICT DO NOTHING)
+    # Connexion classique avec Psycopg2 pour l'insertion sécurisée (ON CONFLICT DO NOTHING)
     conn = psycopg2.connect(host="postgres", database="dst_airlines", user="postgres", password="postgres123")
     cursor = conn.cursor()
     

@@ -9,8 +9,6 @@ from dotenv import load_dotenv
 from etl.utils.config import *
 from etl.utils.mongodb import db
 
-
-
 collection = db["live_flights"]
 
 # Configuration du Consumer Kafka
@@ -28,7 +26,7 @@ for message in consumer:
     states = raw_data.get("states", [])
     
     if states:
-        # Création du document nettoyé (Logique ETL demandée dans votre PDF)
+        # Création du document nettoyé (Logique ETL)
         snapshot = {
             "snapshot_time": datetime.utcnow(),
             "flights_count": len(states),
@@ -55,17 +53,11 @@ for message in consumer:
 
 
 # rajout de la partie suivante pour rendre les scripts exécutables par l'orchestrateur
+#def main():
+    #print("Mongo Consumer lancé")
+    #for message in consumer:
+        #collection.insert_one(snapshot)
 
 
-def main():
-
-    print("Mongo Consumer lancé")
-
-    for message in consumer:
-
-        ...
-        collection.insert_one(snapshot)
-
-
-if __name__ == "__main__":
-    main()
+#if __name__ == "__main__":
+    #main()

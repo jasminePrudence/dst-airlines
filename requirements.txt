@@ -23,7 +23,7 @@ uvicorn
 # Dashboard
 streamlit
 
-# Machine Learning (Sprint 5)
+# Machine Learning
 scikit-learn
 joblib
 

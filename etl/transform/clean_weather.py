@@ -4,7 +4,7 @@ from etl.utils.postgres import engine
 
 print("--- 🧹 Début de la transformation Météo (clean_weather) ---")
 
-# 1. Extraction des données brutes depuis dim_weather
+# Extraction des données brutes depuis dim_weather
 query_extract = """
     SELECT airport_icao, observation_time, temperature, wind_speed, visibility
     FROM dim_weather;
@@ -20,22 +20,22 @@ try:
         
     print(f"📋 {len(df_raw)} lignes extraites de dim_weather.")
 
-    # 2. Transformation / Nettoyage des données
+    # Transformation / Nettoyage des données
     # Exemple : Conversion des vitesses de vent si nécessaire ou renommage des colonnes
     df_clean = pd.DataFrame()
     df_clean['airport_icao'] = df_raw['airport_icao']
     df_clean['observation_time'] = pd.to_datetime(df_raw['observation_time'])
     df_clean['temperature'] = df_raw['temperature'].astype(float)
     
-    # Si vos données de base sont en nœuds (knots), conversion en km/h : 1 knot = 1.852 km/h
+    # Si les données de base sont en nœuds, conversion en km/h : 1 knot = 1.852 km/h
     df_clean['wind_speed_kmh'] = (df_raw['wind_speed'] * 1.852).round(2)
     
     # Si la donnée brute est en mètres, on divise simplement par 1000 pour avoir des km
     df_clean['visibility_km'] = (df_raw['visibility'] / 1000.0).round(2)
-    # 3. Chargement dans la table STG_AVWX
+    # Chargement dans la table STG_AVWX
     # On utilise 'append' pour ajouter les nouvelles données, et on laisse Postgres gérer l'ID (SERIAL)
     with engine.begin() as conn:
-        # Optionnel : On vide stg_avwx avant pour éviter les doublons à chaque run (stratégie Full Refresh)
+        # Optionnel : On vide stg_avwx avant pour éviter les doublons à chaque run (Full Refresh)
         conn.execute(text("TRUNCATE TABLE STG_AVWX RESTART IDENTITY;"))
         
         df_clean.to_sql(

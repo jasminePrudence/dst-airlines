@@ -1,7 +1,5 @@
--- ============================================================================
--- 1. TABLES DE STAGING (Données Brutes Normalisées)
--- ============================================================================
 
+--TABLES DE STAGING (Données Brutes Normalisées)
 CREATE TABLE IF NOT EXISTS STG_AVIATIONSTACK (
     id BIGSERIAL PRIMARY KEY,
     ingestion_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -30,10 +28,7 @@ CREATE TABLE IF NOT EXISTS STG_AVWX (
     visibility_km DECIMAL(6,2)
 );
 
--- ============================================================================
--- 2. DIMENSIONS (Référentiels)
--- ============================================================================
-
+--DIMENSIONS
 CREATE TABLE IF NOT EXISTS DIM_AIRPORTS (
     airport_key SERIAL PRIMARY KEY,
     iata_code VARCHAR(10) UNIQUE,
@@ -88,7 +83,7 @@ CREATE TABLE IF NOT EXISTS dim_date (
     month_name VARCHAR(20),
     week INTEGER,
     day INTEGER,
-    weekday VARCHAR(20),
+    weekday_number VARCHAR(20),
     hour INTEGER,
     minute INTEGER,
     is_weekend BOOLEAN,
@@ -96,12 +91,7 @@ CREATE TABLE IF NOT EXISTS dim_date (
     is_holiday BOOLEAN
 );
 
--- 1. On nettoie l'ancienne colonne et on ajoute la nouvelle dans l'ancienne table dim_date
-ALTER TABLE dim_date DROP COLUMN IF EXISTS day_of_week;
-ALTER TABLE dim_date DROP COLUMN IF EXISTS weekday;
-ALTER TABLE dim_date ADD COLUMN IF NOT EXISTS weekday_number INTEGER;
-
--- 2. On relance l'insertion (Copie-colle cette requête dans ton éditeur)
+--On relance l'insertion
 INSERT INTO dim_date (date_key, full_date, day, month, year, quarter, weekday_number, is_weekend, month_name)
 SELECT 
     to_char(datum, 'YYYYMMDD')::integer AS date_key,
@@ -115,10 +105,8 @@ SELECT
     to_char(datum, 'TMMonth') AS month_name
 FROM generate_series('2026-01-01'::date, '2030-12-31'::date, '1 day'::interval) datum
 ON CONFLICT (date_key) DO NOTHING;
--- ============================================================================
--- 3. TABLE DE FAITS & METRIQUES ML
--- ============================================================================
 
+--TABLE DE FAITS & METRIQUES ML
 CREATE TABLE IF NOT EXISTS FACT_FLIGHTS (
     flight_key BIGSERIAL PRIMARY KEY,
     flight_number VARCHAR(20),
@@ -140,13 +128,11 @@ CREATE TABLE IF NOT EXISTS FACT_FLIGHTS (
     on_ground BOOLEAN,
     -- Variables Environnementales (RSE / CO2)
     estimated_co2_kg DECIMAL(10,2),
-
     -- Métriques de Machine Learning
     predicted_delay_min INT,
     prediction_probability DECIMAL(5,2),
     prediction_model VARCHAR(30),
     prediction_timestamp TIMESTAMP,
-
     snapshot_time TIMESTAMP    
 );
 

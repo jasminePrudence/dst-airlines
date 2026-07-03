@@ -2,7 +2,6 @@
 from sqlalchemy import text
 from datetime import datetime
 
-
 #Aircraft
 def get_or_create_aircraft(conn, icao24, callsign):
 
@@ -41,8 +40,6 @@ def get_or_create_aircraft(conn, icao24, callsign):
     )
 
     return row.fetchone()[0]
-
-
 
 
 #Date

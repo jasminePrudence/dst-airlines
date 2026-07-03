@@ -6,7 +6,6 @@ from kafka import KafkaProducer
 from dotenv import load_dotenv
 from etl.utils.logger import logger
 
-# 1. Chargement explicite du fichier .env
 load_dotenv(dotenv_path="/app/.env")
 
 API_KEY = os.getenv("AVWX_API_KEY")

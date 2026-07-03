@@ -4,7 +4,7 @@ from etl.utils.logger import logger
 
 logger.info("Extraction kaggle")
 def extract():
-
+    extract()
 
 
 

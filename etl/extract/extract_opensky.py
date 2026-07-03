@@ -6,8 +6,6 @@ from etl.utils.logger import logger
 import os
 from dotenv import load_dotenv
 
-
-# Charger les variables d'environnement
 load_dotenv()
 
 def json_serializer(data):
@@ -18,7 +16,6 @@ producer = KafkaProducer(
     bootstrap_servers=['kafka:29092'],
     value_serializer=json_serializer
 )
-
 
 CLIENT_ID = os.getenv("OPENSKY_CLIENT_ID")
 CLIENT_SECRET = os.getenv("OPENSKY_CLIENT_SECRET")
@@ -43,18 +40,17 @@ def get_access_token():
 def fetch_opensky_data():
     """Récupère les données des vols en utilisant le token"""
     try:
-        # 1. Obtenir le token d'accès
+        # Obtenir le token d'accès
         token = get_access_token()
         
-        # 2. Configurer les headers avec le token Bearer
+        # Configurer les headers avec le token Bearer
         headers = {
             'Authorization': f'Bearer {token}'
         }
         
-        # Zone d'exclusion (Axe Paris CDG - Genève GVA comme défini dans votre MVP)
+        # Zone d'exclusion (Axe Paris CDG - Genève GVA comme défini dans notre MVP)
         params = {'lamin': 45.0, 'lamax': 50.0, 'lomin': 1.5, 'lomax': 7.0}
         
-        # 3. Faire la requête vers l'API des vols
         url = "https://opensky-network.org/api/states/all"
 
         print("--- Démarrage du Producer OpenSky (Kafka) ---")

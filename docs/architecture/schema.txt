@@ -1,0 +1,77 @@
+
+--Architecture
+                    DIM_DATE
+                         │
+                         │
+DIM_AIRLINES ────────────┤
+                         │
+DIM_AIRPORTS ────────────┤
+                         │
+DIM_AIRCRAFT ────────────┤
+                         │
+DIM_WEATHER ─────────────┤
+                         │
+                    FACT_FLIGHTS
+
+
+ETL OpenSky alimente :
+
+DIM_AIRCRAFT
+FACT_FLIGHTS
+
+ETL AviationStack alimente :
+
+STG_AVIATIONSTACK
+DIM_AIRLINES
+DIM_AIRPORTS
+FACT_FLIGHTS (historique, horaires, retards)
+
+ETL AVWX alimente :
+
+STG_AVWX
+DIM_WEATHER
+
+
+
+--architecture pipeline
+
+                  OpenSky
+                     │
+                     ▼
+             Kafka (opensky-raw)
+                     │
+             load_postgres.py
+                     │
+        ┌────────────┼─────────────┐
+        ▼            ▼             ▼
+   DIM_AIRCRAFT   DIM_DATE    FACT_FLIGHTS
+
+
+
+Backend FastAPI
+
+Notre architecture devient :
+
+dst-airlines/
+│
+├── backend/
+│   ├── app/
+│   │   ├── main.py
+│   │   ├── database.py
+│   │   ├── models.py
+│   │   ├── schemas.py
+│   │   ├── crud.py
+│   │   ├── config.py
+│   │   └── routers/
+│   │       ├── flights.py
+│   │       ├── airlines.py
+│   │       ├── airports.py
+│   │       └── weather.py
+│   │
+│   ├── requirements.txt
+│   └── Dockerfile
+│
+├── dashboard/
+├── etl/
+├── ml/
+└── docker-compose.yml

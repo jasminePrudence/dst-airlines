@@ -1,0 +1,31 @@
+# Data manipulation
+pandas
+numpy
+
+# APIs
+requests
+python-dotenv
+
+# Kafka
+kafka-python-ng
+
+# PostgreSQL
+sqlalchemy
+psycopg2-binary
+
+# MongoDB
+pymongo
+
+# FastAPI
+fastapi
+uvicorn
+
+# Dashboard
+streamlit
+
+# Machine Learning (Sprint 5)
+scikit-learn
+joblib
+
+# Visualisation
+plotly

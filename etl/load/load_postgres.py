@@ -11,6 +11,8 @@ from etl.load.dim_loader import (
     get_or_create_date
 )
 
+print("🚀 Initialisation du consumer PostgreSQL...")
+
 consumer = KafkaConsumer(
     "opensky-raw",
     bootstrap_servers=["kafka:29092"],
@@ -22,9 +24,11 @@ def load_postgres():
     print("🎧 PostgreSQL Consumer démarré...")
 
     for message in consumer:
+        print("📦 Message Kafka reçu")
         loader.process_snapshot(
             message.value
         )
+        print("✅ Snapshot traité")
 
 if __name__ == "__main__":
     load_postgres()

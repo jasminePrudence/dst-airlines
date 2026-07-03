@@ -35,7 +35,11 @@ CREATE TABLE IF NOT EXISTS DIM_AIRPORTS (
     icao_code VARCHAR(10),
     airport_name VARCHAR(100),
     city VARCHAR(100),
-    country VARCHAR(100)
+    country VARCHAR(100),
+    latitude DOUBLE PRECISION,
+    longitude DOUBLE PRECISION,
+    elevation INTEGER,
+    timezone VARCHAR(50)
 );
 
 CREATE TABLE IF NOT EXISTS DIM_AIRLINES (
@@ -43,6 +47,7 @@ CREATE TABLE IF NOT EXISTS DIM_AIRLINES (
     iata_code VARCHAR(10) UNIQUE,
     icao_code VARCHAR(10),
     airline_name VARCHAR(100),
+    callsign VARCHAR(50),
     country VARCHAR(100)
 
 ); 
@@ -50,17 +55,18 @@ CREATE TABLE IF NOT EXISTS DIM_AIRLINES (
 CREATE TABLE IF NOT EXISTS dim_aircraft (
     aircraft_key SERIAL PRIMARY KEY,
     icao24 VARCHAR(20) UNIQUE NOT NULL,
-    callsign VARCHAR(20),
     registration VARCHAR(20),
     model VARCHAR(50),
     manufacturer VARCHAR(50),
+    aircraft_type VARCHAR(50),
+    engine_type VARCHAR(30),
     first_seen TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     last_seen TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS dim_weather (
     weather_key SERIAL PRIMARY KEY,
-    airport_icao VARCHAR(10) NOT NULL,
+    airport_key INT REFERENCES DIM_AIRPORTS(airport_key),
     weather_source VARCHAR(30),
     observation_time TIMESTAMP,
     temperature DOUBLE PRECISION,
@@ -71,7 +77,7 @@ CREATE TABLE IF NOT EXISTS dim_weather (
     visibility DOUBLE PRECISION,
     cloud_cover VARCHAR(30),
     metar TEXT,
-    UNIQUE(airport_icao, observation_time)
+    UNIQUE(airport_key, observation_time)
 );
 
 CREATE TABLE IF NOT EXISTS dim_date (
@@ -83,7 +89,9 @@ CREATE TABLE IF NOT EXISTS dim_date (
     month_name VARCHAR(20),
     week INTEGER,
     day INTEGER,
-    weekday_number VARCHAR(20),
+    weekday_number INTEGER,
+    weekday_name VARCHAR(20),
+    day_of_year INTEGER,
     hour INTEGER,
     minute INTEGER,
     is_weekend BOOLEAN,
@@ -113,9 +121,10 @@ CREATE TABLE IF NOT EXISTS FACT_FLIGHTS (
     flight_status VARCHAR(30),
     departure_airport_key INT REFERENCES DIM_AIRPORTS(airport_key),
     arrival_airport_key INT REFERENCES DIM_AIRPORTS(airport_key),
+    departure_weather_key INTEGER REFERENCES dim_weather(weather_key),
+    arrival_weather_key INTEGER REFERENCES dim_weather(weather_key),
     airline_key INT REFERENCES DIM_AIRLINES(airline_key),
     aircraft_key INTEGER REFERENCES dim_aircraft(aircraft_key),
-    weather_key INTEGER REFERENCES dim_weather(weather_key),
     date_key INTEGER REFERENCES dim_date(date_key),
     scheduled_departure TIMESTAMP,
     actual_departure TIMESTAMP,
@@ -126,6 +135,9 @@ CREATE TABLE IF NOT EXISTS FACT_FLIGHTS (
     altitude DOUBLE PRECISION,
     velocity DOUBLE PRECISION,
     on_ground BOOLEAN,
+    flight_date DATE,
+    distance_km DOUBLE PRECISION,
+    flight_duration_min INTEGER,
     -- Variables Environnementales (RSE / CO2)
     estimated_co2_kg DECIMAL(10,2),
     -- Métriques de Machine Learning
@@ -137,20 +149,32 @@ CREATE TABLE IF NOT EXISTS FACT_FLIGHTS (
 );
 
 
-CREATE INDEX idx_fact_date
+CREATE INDEX IF NOT EXISTS idx_fact_date
 ON fact_flights(date_key);
 
-CREATE INDEX idx_fact_airline
+CREATE INDEX IF NOT EXISTS idx_fact_airline
 ON fact_flights(airline_key);
 
-CREATE INDEX idx_fact_aircraft
+CREATE INDEX IF NOT EXISTS idx_fact_aircraft
 ON fact_flights(aircraft_key);
 
-CREATE INDEX idx_fact_departure
+CREATE INDEX IF NOT EXISTS idx_fact_departure
 ON fact_flights(departure_airport_key);
 
-CREATE INDEX idx_fact_arrival
+CREATE INDEX IF NOT EXISTS idx_fact_arrival
 ON fact_flights(arrival_airport_key);
 
-CREATE INDEX idx_fact_weather
+CREATE INDEX IF NOT EXISTS idx_fact_weather
 ON fact_flights(weather_key);
+
+CREATE INDEX IF NOT EXISTS idx_weather_airport
+ON dim_weather(airport_key);
+
+CREATE INDEX IF NOT EXISTS idx_weather_time
+ON dim_weather(observation_time);
+
+CREATE INDEX IF NOT EXISTS idx_aircraft_icao24
+ON dim_aircraft(icao24);
+
+CREATE INDEX IF NOT EXISTS idx_airport_iata
+ON dim_airports(iata_code);

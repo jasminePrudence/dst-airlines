@@ -35,6 +35,8 @@ def load_mongo_db():
             }
             
             for s in states:
+                if s[5] is None or s[6] is None:
+                    continue
                 # NETTOYAGE : Suppression des espaces sur le callsign (Ex: 'AFR123  ' -> 'AFR123')
                 callsign = s[1].strip() if s[1] else None
                 
@@ -49,8 +51,14 @@ def load_mongo_db():
                 })
                 
             # Ingestion finale NoSQL
-            collection.insert_one(snapshot)
-            print(f"[{datetime.now().strftime('%H:%M:%S')}] 💾 {len(states)} avions nettoyés et stockés dans MongoDB.")
+            snapshot["flights_count"] = len(snapshot["states"])
+
+            # Ingestion finale NoSQL
+            if snapshot["flights_count"] > 0:
+                collection.insert_one(snapshot)
+                print(f"[{datetime.now().strftime('%H:%M:%S')}] 💾 {snapshot['flights_count']} avions nettoyés et stockés dans MongoDB.")
 
 if __name__ == "__main__":
+    collection.create_index("snapshot_time", expireAfterSeconds=10800)
+    print("Index TTL actif : purge automatique des données après 3 heures.")
     load_mongo_db()
